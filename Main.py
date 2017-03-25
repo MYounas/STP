@@ -35,7 +35,20 @@ class Main:
         #get list of switches jin ke root port set ni hoi basic rp setting k bad
         nonRootList=self.getNonRootSwitches()
 
-        self.setRPOfNonROOT()
+        #set nonRoot switche's port to rp one by one
+
+        if nonRootList:
+            portsDist={}
+
+            for i in range(len(nonRootList)):
+                portsDist = {}
+                currentSwitch=self.switches[nonRootList[i]]
+                for j in range(currentSwitch.ports):
+                    currentPort=currentSwitch.portsConf[j]
+                    portsDist[j]=self.setRPOfNonROOT(currentSwitch,currentPort,dist=0)
+
+
+        #work for dp
 
         print("thanks")
 
@@ -44,14 +57,30 @@ class Main:
         #     print(dir(switches[i]))
 
 
-    def setRPOfNonROOT(self):
-        pass
+    def setRPOfNonROOT(self,switch,port,dist):
+
+        # portDistToRoot={}   #save as {port number:distance root switch tk}
+
+        if port[1]==0:
+            dist += 1
+            return dist
+
+        else:
+            tempSwitch=self.switches[port[1]]
+            dist += 1
+            for j in range(tempSwitch.ports):
+                tempPort=tempSwitch.portsConf[j]
+                return self.setRPOfNonROOT(self.switches[port[1]],tempPort,dist)
+
+
+
+
 
     def getNonRootSwitches(self):
 
         nonRootList=[];rootFlag=False
 
-        for i in range(len(self.switches)):
+        for i in range(1,len(self.switches)):
             rootFlag = False
             for j in range(self.switches[i].ports):
                 if self.switches[i].portsConf[j][0]=="rp":
@@ -62,6 +91,8 @@ class Main:
 
             if not rootFlag:
                 nonRootList.append(i)
+
+        return nonRootList
 
     def rootSelectionFromRoot(self,oppPorts,listKeys):
 
